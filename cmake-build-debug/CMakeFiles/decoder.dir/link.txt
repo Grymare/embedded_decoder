@@ -1,1 +1,0 @@
-/usr/bin/cc -g   CMakeFiles/decoder.dir/main.c.o  -o decoder 
