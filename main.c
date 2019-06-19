@@ -2,13 +2,50 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+int NUMBER_OF_LENAS_SATELLITES = 24;
+int NUMBER_OF_BITS_IN_A_SEQUENCE = 1023;
 
-int generateMotherSequence(long *sequence, long *indexUsed) {
-    long base[10] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-    for (int i = 0; i < 1023; ++i) {
+void generateMotherSequence(int mother[], int indices[]) {
+    int sequence[10] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
+    for (int i = 0; i < NUMBER_OF_BITS_IN_A_SEQUENCE; i++) {
+        int xorValue = 0;
+
+
+        for (int j = 0; j < sizeof(indices)/ sizeof(int); j++) {
+            xorValue += sequence[indices[j]];
+        }
+        mother[i] = sequence[9];
+
+        // Shift all values to the right
+        for (int k = 9; k > 0; k--) {
+            sequence[k] = sequence[k - 1];
+        }
+        sequence[0] = xorValue % 2;
     }
+}
+
+int decode() {
+
+    printf("decode");
+    int goldCodes[24][1023] = {0};
+
+    int firstMotherSequence[1023];
+    int secondMotherSequence[1023];
+
+    int firstIndices[2] = {2, 9};
+    int secondIndices[6] = {1, 2, 5, 7, 8, 9};
+
+    generateMotherSequence(firstMotherSequence, firstIndices);
+
+    for (int i = 0; i < sizeof(firstMotherSequence); i++) {
+        printf("%d ", firstMotherSequence[i]);
+        printf("\n");
+    }
+
+//    generateMotherSequence(secondMotherSequence, secondIndices);
+
 
 }
 
@@ -50,19 +87,14 @@ int main(int argc, char *argv[]) {
     fclose(ptr_file);
 
 
-    // Print all numbers
-    for (int j = 0; j < 1023; j++) {
-        printf("%ld\n", mySequence[j]);
-    }
+//    // Print all numbers
+//    for (int j = 0; j < 1023; j++) {
+//        printf("%ld\n", mySequence[j]);
+//    }
 
-    long firstMotherSequence[1023];
-    long secondMotherSequence[1023];
+    printf("test");
 
-    long firstIndices[2] = {-1, 2};
-    long secondIndices[6] = {-1, 1, 2, 5, 7, 8};
-
-    generateMotherSequence(firstMotherSequence, firstIndices);
-    generateMotherSequence(secondMotherSequence, secondIndices);
+    decode();
 
 
     return 0;
