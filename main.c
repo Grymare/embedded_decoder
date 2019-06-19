@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <memory.h>
 
-int NUMBER_OF_LENAS_SATELLITES = 24;
-int NUMBER_OF_BITS_IN_A_SEQUENCE = 1023;
+const int NUMBER_OF_LENAS_SATELLITES = 24;
+const int NUMBER_OF_BITS_IN_A_SEQUENCE = 1023;
 
 
 void generateMotherSequence(int mother[], int indices[]) {
@@ -27,8 +28,52 @@ void generateMotherSequence(int mother[], int indices[]) {
     }
 }
 
+
+void rotateByOne(int arr[]) {
+    int i, last;
+
+    last = arr[1022];
+
+    for (i = 1022; i > 0; i--) {
+        arr[i] = arr[i - 1];
+    }
+
+    arr[0] = last;
+}
+
+void rotateArray(int arr[], int t) {
+    for (int j = 0; j < t; ++j) {
+        rotateByOne(arr);
+    }
+}
+
+
+void generateGoldCodes(int firstMotherSequence[], int secondMotherSequence[], int goldCodes[24][1023]) {
+    int t[] = {5, 6, 7, 8, 17, 18, 139, 140, 141, 251, 252, 254, 255,
+               256, 257, 258, 469, 470, 471, 472, 473, 474, 509, 512};
+
+    for (int i = 0; i < NUMBER_OF_LENAS_SATELLITES; i++) {
+        int workingSequence[1023];
+        memcpy(workingSequence, secondMotherSequence, 1023 * sizeof(int));
+
+        rotateArray(workingSequence, t[i]);
+
+        // If the XOR product is 0 we write a -1 in that position otherwise we simply put a 1 there
+        for (int k = 0; k < NUMBER_OF_BITS_IN_A_SEQUENCE; ++k) {
+            goldCodes[i][k] = ((firstMotherSequence[k] + workingSequence[k]) % 2) == 0 ? -1 : 1;
+        }
+    }
+
+    printf("\nGOLD: ");
+    for (int i = 0; i < 1023; ++i) {
+        printf("%d", goldCodes[0][i]);
+    }
+
+
+}
+
+
 int decode() {
-    printf("decode");
     int goldCodes[24][1023] = {0};
 
     int firstMotherSequence[1023];
@@ -40,6 +85,7 @@ int decode() {
     generateMotherSequence(firstMotherSequence, firstIndices);
     generateMotherSequence(secondMotherSequence, secondIndices);
 
+    generateGoldCodes(firstMotherSequence, secondMotherSequence, goldCodes);
 
 }
 
@@ -82,7 +128,7 @@ int main(int argc, char *argv[]) {
 
 
 //    // Print all numbers
-//    for (int j = 0; j < 1023; j++) {
+//    for (int j = 0; j < NUMBER_OF_BITS_IN_A_SEQUENCE; j++) {
 //        printf("%ld\n", mySequence[j]);
 //    }
 
