@@ -69,11 +69,118 @@ void generateGoldCodes(int firstMotherSequence[], int secondMotherSequence[], in
         printf("%d", goldCodes[0][i]);
     }
 
+}
+
+int largest(int arr[], int n) {
+    int i;
+    int max = arr[0];
+    for (i = 1; i < n; i++)
+        if (arr[i] > max)
+            max = arr[i];
+
+    return max;
+}
+
+int smallest(int arr[], int n) {
+    int i;
+    int min = arr[0];
+    for (i = 1; i < n; i++)
+        if (arr[i] < min)
+            min = arr[i];
+
+    return min;
+}
+
+int getNumberOfSatellites(int sequence[]) {
+    int max = largest(sequence, 1023);
+    int min = smallest(sequence, 1023);
+
+    int myOtherArray[] = {max, abs(min)};
+    return largest(myOtherArray, 2);
+}
+
+void getSequenceFromTxtFile(char *filename, int sequence[]) {
+    int i = 0;
+    FILE *ptr_file;
+
+    char buffer[1000];
+
+    printf("Auszulesende Datei: %s\n\n", filename);
+
+    ptr_file = fopen(filename, "r");
+
+
+    if (!ptr_file) {
+        printf("ERROR");
+    }
+
+    while (fgets(buffer, 1000, ptr_file) != NULL) {
+        printf("%s\n", buffer);
+
+        char *p = buffer;
+        while (*p) { // While there are more characters to process...
+            if (isdigit(*p) || ((*p == '-' || *p == '+') && isdigit(*(p + 1)))) {
+                // Found a number
+                long val = strtol(p, &p, 10); // Read number
+                sequence[i++] = val;
+
+            } else {
+                // Otherwise, move on to the next character.
+                p++;
+            }
+        }
+    }
+
+    fclose(ptr_file);
+}
+
+int getScalarProduct(int sequence[1023], int sequenceTwo[1023]) {
+    int scalarProduct = 0;
+    for (int i = 0; i < 1023; ++i) {
+        scalarProduct += sequence[i] * sequenceTwo[i];
+    }
+    return scalarProduct;
+}
+
+compareSequences(int **goldCodes, char *filename) {
+    int gpsSequence[1023];
+    getSequenceFromTxtFile(filename, gpsSequence);
+    int numberOfSatellites = getNumberOfSatellites(gpsSequence);
+    //TODO: 65?
+    int maxMargin = 1023 - (numberOfSatellites * 65);
+    int minMargin = (numberOfSatellites * 65) - 1023;
+
+    for (int i = 0; i < 24; ++i) {
+        int maxScalar = 0;
+        int offsetWithMaxScalar = -1;
+
+        for (int j = 0; j < 1023; ++j) {
+            int gpsSequenceWithOffset[1023];
+            memcpy(gpsSequenceWithOffset, gpsSequence, 1023 * sizeof(int));
+            rotateArray(gpsSequenceWithOffset, j);
+
+            int scalarProduct = getScalarProduct(goldCodes[i], gpsSequenceWithOffset);
+            if (abs(scalarProduct) > abs(maxScalar)) {
+                maxScalar = scalarProduct;
+                offsetWithMaxScalar = j;
+            }
+            if (maxScalar >= maxMargin || maxScalar <= minMargin) {
+                int bitValue = (scalarProduct > 1) ? 1 : 0;
+                printf("\nSatellite %d has sent bit %d (delta = %d)", i + 1, bitValue, offsetWithMaxScalar);
+
+            }
+
+        }
+        printf("\nmaxScalar %d", maxScalar);
+        printf("   maxMargin %d", maxMargin);
+        printf("   minMargin %d", minMargin);
+        printf("\nFERTIG %d", i);
+    }
 
 }
 
 
-int decode() {
+int decode(char *filename) {
     int goldCodes[24][1023] = {0};
 
     int firstMotherSequence[1023];
@@ -87,55 +194,13 @@ int decode() {
 
     generateGoldCodes(firstMotherSequence, secondMotherSequence, goldCodes);
 
+    compareSequences(goldCodes, filename);
+
 }
 
 
 int main(int argc, char *argv[]) {
-    char *filename = argv[1];
-    int i = 0;
-    FILE *ptr_file;
-
-    char buffer[1000];
-    long mySequence[1023];
-
-    printf("Auszulesende Datei: %s\n\n", filename);
-
-    ptr_file = fopen(filename, "r");
-
-
-    if (!ptr_file) {
-        return 1;
-    }
-
-    while (fgets(buffer, 1000, ptr_file) != NULL) {
-        printf("%s\n", buffer);
-
-        char *p = buffer;
-        while (*p) { // While there are more characters to process...
-            if (isdigit(*p) || ((*p == '-' || *p == '+') && isdigit(*(p + 1)))) {
-                // Found a number
-                long val = strtol(p, &p, 10); // Read number
-                mySequence[i++] = val;
-
-            } else {
-                // Otherwise, move on to the next character.
-                p++;
-            }
-        }
-    }
-
-    fclose(ptr_file);
-
-
-//    // Print all numbers
-//    for (int j = 0; j < NUMBER_OF_BITS_IN_A_SEQUENCE; j++) {
-//        printf("%ld\n", mySequence[j]);
-//    }
-
-    printf("test");
-
-    decode();
-
+    decode(argv[1]);
 
     return 0;
 }

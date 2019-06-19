@@ -4,3 +4,5 @@ cmake-build-debug/
 \.idea/
 
 a\.out
+
+gps_sequence_7\.txt
