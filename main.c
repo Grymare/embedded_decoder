@@ -142,7 +142,7 @@ int getScalarProduct(int sequence[1023], int sequenceTwo[1023]) {
     return scalarProduct;
 }
 
-compareSequences(int **goldCodes, char *filename) {
+compareSequences(int goldCodes[24][1023], char *filename) {
     int gpsSequence[1023];
     getSequenceFromTxtFile(filename, gpsSequence);
     int numberOfSatellites = getNumberOfSatellites(gpsSequence);
