@@ -8,13 +8,14 @@ int NUMBER_OF_BITS_IN_A_SEQUENCE = 1023;
 
 void generateMotherSequence(int mother[], int indices[]) {
     int sequence[10] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    printf("generator");
 
     for (int i = 0; i < NUMBER_OF_BITS_IN_A_SEQUENCE; i++) {
         int xorValue = 0;
 
-
-        for (int j = 0; j < sizeof(indices)/ sizeof(int); j++) {
+        for (int j = 0; indices[j] != 0; j++) {
             xorValue += sequence[indices[j]];
+            printf("indices: %d", indices[j]);
         }
         mother[i] = sequence[9];
 
@@ -27,7 +28,6 @@ void generateMotherSequence(int mother[], int indices[]) {
 }
 
 int decode() {
-
     printf("decode");
     int goldCodes[24][1023] = {0};
 
@@ -38,13 +38,7 @@ int decode() {
     int secondIndices[6] = {1, 2, 5, 7, 8, 9};
 
     generateMotherSequence(firstMotherSequence, firstIndices);
-
-    for (int i = 0; i < sizeof(firstMotherSequence); i++) {
-        printf("%d ", firstMotherSequence[i]);
-        printf("\n");
-    }
-
-//    generateMotherSequence(secondMotherSequence, secondIndices);
+    generateMotherSequence(secondMotherSequence, secondIndices);
 
 
 }
