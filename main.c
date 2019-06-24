@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <memory.h>
+#include <math.h>
 
 const int NUMBER_OF_LENAS_SATELLITES = 24;
 const int NUMBER_OF_BITS_IN_A_SEQUENCE = 1023;
@@ -146,12 +147,9 @@ compareSequences(int goldCodes[24][1023], char *filename) {
     int gpsSequence[1023];
     getSequenceFromTxtFile(filename, gpsSequence);
     int numberOfSatellites = getNumberOfSatellites(gpsSequence);
-    //TODO: 65?
-    int maxMargin = 1023 - (numberOfSatellites * 65);
-    int minMargin = (numberOfSatellites * 65) - 1023;
 
     for (int i = 0; i < 24; ++i) {
-        int maxScalar = 0;
+        float maxScalar = 0.0;
         int offsetWithMaxScalar = -1;
 
         for (int j = 0; j < 1023; ++j) {
@@ -160,21 +158,21 @@ compareSequences(int goldCodes[24][1023], char *filename) {
             rotateArray(gpsSequenceWithOffset, j);
 
             int scalarProduct = getScalarProduct(goldCodes[i], gpsSequenceWithOffset);
-            if (abs(scalarProduct) > abs(maxScalar)) {
-                maxScalar = scalarProduct;
+            float scalarFixed = scalarProduct / 1023.0;
+            if (fabsf(scalarFixed) > fabsf(maxScalar)) {
+                maxScalar = scalarFixed;
                 offsetWithMaxScalar = j;
             }
-            if (maxScalar >= maxMargin || maxScalar <= minMargin) {
-                int bitValue = (scalarProduct > 1) ? 1 : 0;
-                printf("\nSatellite %d has sent bit %d (delta = %d)", i + 1, bitValue, offsetWithMaxScalar);
-
-            }
+        }
+        if (maxScalar >= 0.252) {
+            printf("\nSatellite %d has sent bit %d (delta = %d)", i + 1, 1, offsetWithMaxScalar);
+        } else if (maxScalar <= -0.252) {
+            printf("\nSatellite %d has sent bit %d (delta = %d)", i + 1, 0, offsetWithMaxScalar);
 
         }
-        printf("\nmaxScalar %d", maxScalar);
-        printf("   maxMargin %d", maxMargin);
-        printf("   minMargin %d", minMargin);
-        printf("\nFERTIG %d", i);
+
+
+        //printf("\nAbgeschlossener Test für Satellit: %d", i);
     }
 
 }
