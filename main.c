@@ -8,18 +8,24 @@ const int NUMBER_OF_LENAS_SATELLITES = 24;
 const int NUMBER_OF_BITS_IN_A_SEQUENCE = 1023;
 
 
-void generateMotherSequence(int mother[], int indices[]) {
+void generateMotherSequenceOne(int mother[]) {
     int sequence[10] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-    printf("generator");
+    int indices[2] = {2, 9};
 
-    for (int i = 0; i < NUMBER_OF_BITS_IN_A_SEQUENCE; i++) {
+    printf("\nMutter 1: ");
+    for (int k = 0; k < 2; k++) {
+        printf("%d", indices[k]);
+    }
+
+    for (int i = 0; i < 1023; i++) {
         int xorValue = 0;
 
-        for (int j = 0; indices[j] != 0; j++) {
+
+        for (int j = 0; j < 2; j++) {
             xorValue += sequence[indices[j]];
-            printf("indices: %d", indices[j]);
         }
         mother[i] = sequence[9];
+        printf("%d", mother[i]);
 
         // Shift all values to the right
         for (int k = 9; k > 0; k--) {
@@ -29,6 +35,33 @@ void generateMotherSequence(int mother[], int indices[]) {
     }
 }
 
+
+void generateMotherSequenceTwo(int mother[]) {
+    int sequence[10] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    int indices[6] = {1, 2, 5, 7, 8, 9};
+
+    printf("\nMutter 2: ");
+    for (int k = 0; k < 6; k++) {
+        printf("%d", indices[k]);
+    }
+
+    for (int i = 0; i < 1023; i++) {
+        int xorValue = 0;
+
+
+        for (int j = 0; j < 6; j++) {
+            xorValue += sequence[indices[j]];
+        }
+        mother[i] = sequence[9];
+        printf("%d", mother[i]);
+
+        // Shift all values to the right
+        for (int k = 9; k > 0; k--) {
+            sequence[k] = sequence[k - 1];
+        }
+        sequence[0] = xorValue % 2;
+    }
+}
 
 void rotateByOne(int arr[]) {
     int i, last;
@@ -65,114 +98,97 @@ void generateGoldCodes(int firstMotherSequence[], int secondMotherSequence[], in
         }
     }
 
-    printf("\nGOLD: ");
-    for (int i = 0; i < 1023; ++i) {
-        printf("%d", goldCodes[0][i]);
-    }
-
 }
 
-int largest(int arr[], int n) {
-    int i;
-    int max = arr[0];
-    for (i = 1; i < n; i++)
-        if (arr[i] > max)
-            max = arr[i];
 
-    return max;
-}
-
-int smallest(int arr[], int n) {
-    int i;
-    int min = arr[0];
-    for (i = 1; i < n; i++)
-        if (arr[i] < min)
-            min = arr[i];
-
-    return min;
-}
-
-int getNumberOfSatellites(int sequence[]) {
-    int max = largest(sequence, 1023);
-    int min = smallest(sequence, 1023);
-
-    int myOtherArray[] = {max, abs(min)};
-    return largest(myOtherArray, 2);
-}
-
-void getSequenceFromTxtFile(char *filename, int sequence[]) {
+void getSequenceFromTxtFile(char *filename, int *sequence) {
     int i = 0;
-    FILE *ptr_file;
+    for (int j = 0; j < 2; ++j) {
+        FILE *ptr_file;
 
-    char buffer[1000];
+        char buffer[1000];
 
-    printf("Auszulesende Datei: %s\n\n", filename);
+        printf("Auszulesende Datei: %s\n\n", filename);
 
-    ptr_file = fopen(filename, "r");
+        ptr_file = fopen(filename, "r");
 
 
-    if (!ptr_file) {
-        printf("ERROR");
-    }
+        if (!ptr_file) {
+            printf("ERROR");
+        }
 
-    while (fgets(buffer, 1000, ptr_file) != NULL) {
-        printf("%s\n", buffer);
 
-        char *p = buffer;
-        while (*p) { // While there are more characters to process...
-            if (isdigit(*p) || ((*p == '-' || *p == '+') && isdigit(*(p + 1)))) {
-                // Found a number
-                long val = strtol(p, &p, 10); // Read number
-                sequence[i++] = val;
+        while (fgets(buffer, 1000, ptr_file) != NULL) {
+//            printf("%s\n", buffer);
 
-            } else {
-                // Otherwise, move on to the next character.
-                p++;
+            char *p = buffer;
+            while (*p) { // While there are more characters to process...
+                if (isdigit(*p) || ((*p == '-' || *p == '+') && isdigit(*(p + 1)))) {
+                    // Found a number
+                    long val = strtol(p, &p, 10); // Read number
+                    sequence[i++] = val;
+
+                } else {
+                    // Otherwise, move on to the next character.
+                    p++;
+                }
             }
         }
-    }
 
-    fclose(ptr_file);
+        fclose(ptr_file);
+    }
 }
 
-int getScalarProduct(int sequence[1023], int sequenceTwo[1023]) {
+int scalarProductCalculation(int *goldCode, int *gpsSequence) {
     int scalarProduct = 0;
+//    printf("\nGPSSequenz: ");
     for (int i = 0; i < 1023; ++i) {
-        scalarProduct += sequence[i] * sequenceTwo[i];
+//        printf("%d", gpsSequence[i]);
+        scalarProduct += goldCode[i] * gpsSequence[i];
     }
     return scalarProduct;
 }
 
 compareSequences(int goldCodes[24][1023], char *filename) {
-    int gpsSequence[1023];
+    int gpsSequence[2046];
     getSequenceFromTxtFile(filename, gpsSequence);
-    int numberOfSatellites = getNumberOfSatellites(gpsSequence);
+
+    printf("\nGps aus Datei: ");
+    for (int k = 0; k < 2046; ++k) {
+        printf("%d", gpsSequence[k]);
+    }
+
+    printf("\nGold 17:");
+    for (int i = 0; i < 1023; ++i) {
+        printf("%d", goldCodes[16][i]);
+
+    }
+
+
+    printf("\n\n");
 
     for (int i = 0; i < 24; ++i) {
         float maxScalar = 0.0;
         int offsetWithMaxScalar = -1;
 
         for (int j = 0; j < 1023; ++j) {
-            int gpsSequenceWithOffset[1023];
-            memcpy(gpsSequenceWithOffset, gpsSequence, 1023 * sizeof(int));
-            rotateArray(gpsSequenceWithOffset, j);
 
-            int scalarProduct = getScalarProduct(goldCodes[i], gpsSequenceWithOffset);
+            int scalarProduct = scalarProductCalculation(goldCodes[i], gpsSequence + j);
             float scalarFixed = scalarProduct / 1023.0;
             if (fabsf(scalarFixed) > fabsf(maxScalar)) {
                 maxScalar = scalarFixed;
                 offsetWithMaxScalar = j;
             }
         }
-        if (maxScalar >= 0.252) {
-            printf("\nSatellite %d has sent bit %d (delta = %d)", i + 1, 1, offsetWithMaxScalar);
-        } else if (maxScalar <= -0.252) {
-            printf("\nSatellite %d has sent bit %d (delta = %d)", i + 1, 0, offsetWithMaxScalar);
-
+//        printf("\n Satellit %d hat maxScalar: %f", i + 1, maxScalar);
+        if (maxScalar >= 0.8) {
+            printf("\n\nSatellite %d has sent bit %d (delta = %d)", i + 1, 1, offsetWithMaxScalar);
+            printf("\n Scalar: %f", maxScalar);
+        } else if (maxScalar <= -0.8) {
+            printf("\n\nSatellite %d has sent bit %d (delta = %d)", i + 1, 0, offsetWithMaxScalar);
+            printf("\n Scalar: %f", maxScalar);
         }
 
-
-        //printf("\nAbgeschlossener Test für Satellit: %d", i);
     }
 
 }
@@ -184,13 +200,12 @@ int decode(char *filename) {
     int firstMotherSequence[1023];
     int secondMotherSequence[1023];
 
-    int firstIndices[2] = {2, 9};
-    int secondIndices[6] = {1, 2, 5, 7, 8, 9};
 
-    generateMotherSequence(firstMotherSequence, firstIndices);
-    generateMotherSequence(secondMotherSequence, secondIndices);
+    generateMotherSequenceOne(firstMotherSequence);
+    generateMotherSequenceTwo(secondMotherSequence);
 
     generateGoldCodes(firstMotherSequence, secondMotherSequence, goldCodes);
+
 
     compareSequences(goldCodes, filename);
 
